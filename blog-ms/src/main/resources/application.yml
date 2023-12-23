@@ -1,0 +1,13 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: BLOG
+  datasource:
+    url: jdbc:mysql://localhost:3306/blog-ms
+    username: root
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
