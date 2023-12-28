@@ -42,7 +42,7 @@ public class ArticleService {
         Utilisateur auteur = restTemplate.getForObject(this.URL + "/users/auth/" + article.getAuteur(), Utilisateur.class);
         return ArticleResponse.builder().id(article.getId()).titre(article.getTitre()).auteur(auteur).categorie(article.getCategorie())
                 .contenu(article.getContenu()).build(); }
-    public void AddArticle(Article article){
+    public  void AddArticle(Article article){
         articleRepository.save(article);
     }
     public ArticleResponse UpdateArticle(Article updatedArticle){
