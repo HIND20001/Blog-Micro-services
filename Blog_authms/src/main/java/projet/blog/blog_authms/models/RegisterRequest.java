@@ -1,19 +1,19 @@
-package projet.blog.Blog_ms2.entities;
+package projet.blog.blog_authms.models;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import projet.blog.blog_authms.entities.Role;
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Utilisateur {
-    private Long id;
+public class RegisterRequest {
     private String nom;
     private String prenom;
     private String email;
     private String username;
     private String password;
-
-
+    private Role role;
 }

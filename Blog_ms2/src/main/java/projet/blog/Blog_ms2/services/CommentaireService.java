@@ -10,6 +10,7 @@ import projet.blog.Blog_ms2.entities.Utilisateur;
 import projet.blog.Blog_ms2.models.CommentaireResponse;
 import projet.blog.Blog_ms2.repositories.CommentaireRepository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,8 +18,8 @@ import java.util.List;
 public class CommentaireService {
     @Autowired
     CommentaireRepository commentaireRepository;
-    private final String URL="http://localhost:8083";
-    private final String URL2="http://localhost:8081";
+    private final String URL="http://auth-service:8083";
+    private final String URL2="http://articles-service:8081";
 
 
     @Autowired
@@ -34,11 +35,19 @@ RestTemplate restTemplate;
         Article[] articles=responseArticle.getBody();
         return comments.stream().map((Commentaire a)->mapToCommentResponse(a,users,articles)).toList();
     }
-   public CommentaireResponse FindById(Long id) throws Exception {
+   public CommentaireResponse findById(Long id) throws Exception {
        Commentaire comment = commentaireRepository.findById(id).orElseThrow(() -> new Exception("ID comment not found"));
-       Utilisateur auteur = restTemplate.getForObject(this.URL + "/users/auth/" + comment.getIdUser(), Utilisateur.class);
-       Article article = restTemplate.getForObject(this.URL2 + "/articles/" + comment.getIdArticle(), Article.class);
-       return CommentaireResponse.builder().id(comment.getId()).contenu(comment.getContenu()).auteur(auteur)
+
+       ResponseEntity<Utilisateur[]> responseUser=restTemplate.getForEntity(this.URL+"/users/auth",
+               Utilisateur[].class);
+       Utilisateur[] users=responseUser.getBody();
+
+       ResponseEntity<Article[]> responseArticle=restTemplate.getForEntity(this.URL2+"/articles",
+               Article[].class);
+       Article article= Arrays.stream(responseArticle.getBody()).toList().get(0);
+       Utilisateur user= Arrays.stream(responseUser.getBody()).toList().get(0);
+
+       return CommentaireResponse.builder().id(comment.getId()).contenu(comment.getContenu()).owner(user)
                .article(article)
                .build();
    }
@@ -47,34 +56,43 @@ RestTemplate restTemplate;
                 .findFirst().orElse(null);
         Article foundarticle= Arrays.stream(articles).filter(article->article.getId().equals(c.getIdArticle()))
                 .findFirst().orElse(null);
-        return CommentaireResponse.builder().id(c.getId()).contenu(c.getContenu()).auteur(founduser)
+        return CommentaireResponse.builder().id(c.getId()).contenu(c.getContenu()).owner(founduser)
                 .article(foundarticle)
               .build();
 
     }
-    public void AddCommentaire(Commentaire commentaire){
+    public void addCommentaire(Commentaire commentaire){
         commentaireRepository.save(commentaire);
     }
-    public CommentaireResponse UpdateComment(Commentaire UpdatedComment){
+    public CommentaireResponse updateComment(Commentaire UpdatedComment){
         Commentaire oldComment=commentaireRepository.findById(UpdatedComment.getId()).orElse(null);
 
         if(oldComment!=null){
             oldComment.setContenu(UpdatedComment.getContenu());
             oldComment.setIdUser(UpdatedComment.getIdUser());
             oldComment.setIdArticle(UpdatedComment.getIdArticle());
-
             commentaireRepository.save(oldComment);
         }
         Utilisateur auteur = restTemplate.getForObject(this.URL + "/users/auth/" + oldComment.getIdUser(), Utilisateur.class);
         Article article = restTemplate.getForObject(this.URL2 + "/articles/" + oldComment.getIdArticle(), Article.class);
 
-        return CommentaireResponse.builder().id(oldComment.getId()).contenu(oldComment.getContenu()).auteur(auteur)
+        return CommentaireResponse.builder().id(oldComment.getId()).contenu(oldComment.getContenu()).owner(auteur)
                 .article(article)
                .build();
     }
-    public void DeleteCommentaire(Long id){
+    public void deleteCommentaire(Long id){
          Commentaire deletedComment=commentaireRepository.findById(id).orElse(null);
         commentaireRepository.delete(deletedComment);
    }
+    public List<CommentaireResponse> findCommentairesByArticle(Long id) {
+        List<Commentaire> commentaires=commentaireRepository.findCommentsByIdArticle(id);
+        List<CommentaireResponse> commentaireR=new ArrayList<>();
+        for(Commentaire a:commentaires){
+            Utilisateur auteur = restTemplate.getForObject(this.URL + "/users/auth/" + a.getIdUser(), Utilisateur.class);
+            Article article = restTemplate.getForObject(this.URL2 + "/articles/" + a.getIdArticle(), Article.class);
+            commentaireR.add(CommentaireResponse.builder().id(a.getId()).contenu(a.getContenu()).owner(auteur).article(article)
+                    .build());
+        }
 
+        return commentaireR;    }
 }

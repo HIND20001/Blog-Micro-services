@@ -1,4 +1,4 @@
-package projet.blog.Blog_ms2.entities;
+package projet.blog.blog_ms1.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +14,5 @@ public class Utilisateur {
     private String email;
     private String username;
     private String password;
-
 
 }

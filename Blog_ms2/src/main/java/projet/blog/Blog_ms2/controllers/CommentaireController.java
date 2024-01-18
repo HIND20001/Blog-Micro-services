@@ -21,18 +21,22 @@ public class CommentaireController {
     }
     @GetMapping("/{id}")
     CommentaireResponse getById(@PathVariable Long id) throws Exception {
-        return commentaireService.FindById(id);
+        return commentaireService.findById(id);
     }
     @PostMapping
-    void Add(@RequestBody Commentaire commentaire){
-        commentaireService.AddCommentaire(commentaire);
+    void add(@RequestBody Commentaire commentaire){
+        commentaireService.addCommentaire(commentaire);
     }
     @DeleteMapping("/{id}")
-    void Delete(@PathVariable Long id){
-        commentaireService.DeleteCommentaire(id);
+    void delete(@PathVariable Long id){
+        commentaireService.deleteCommentaire(id);
     }
     @PutMapping
-    CommentaireResponse Update(@RequestBody Commentaire commentaire){
-        return commentaireService.UpdateComment(commentaire);
+    CommentaireResponse update(@RequestBody Commentaire commentaire){
+        return commentaireService.updateComment(commentaire);
+    }
+    @GetMapping("/articles/{id}")
+    List<CommentaireResponse> getCommentsByArticleId(@PathVariable Long id) {
+        return commentaireService.findCommentairesByArticle(id);
     }
 }

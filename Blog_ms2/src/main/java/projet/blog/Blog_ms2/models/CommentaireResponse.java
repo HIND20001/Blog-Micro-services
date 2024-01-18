@@ -16,6 +16,6 @@ public class CommentaireResponse {
         private Long id;
         private String contenu;
         private Article article;
-        private Utilisateur auteur;
+        private Utilisateur owner;
 
 }
